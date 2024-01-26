@@ -15,7 +15,7 @@ public class DialogueManager : MonoBehaviour
     public static DialogueVariables variables;
     public TMP_Text textPrefab;
     public Button buttonPrefab;
-
+    public Transform player;
 
     [Header("load globals json")]
     [SerializeField] public TextAsset loadGlobalsJson;
@@ -32,14 +32,14 @@ public class DialogueManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        story = new Story(dialogueContainers[0].dialog.text);
+        //story = new Story(dialogueContainers[0].dialog.text);
 
-        refreshUI();
+        //refreshUI();
         if (variables == null)
         {
             variables = new DialogueVariables(loadGlobalsJson);
         }
-        variables.StartListening(story);
+        // variables.StartListening(story);
 
     }
 
@@ -60,12 +60,14 @@ public class DialogueManager : MonoBehaviour
         story = new Story(inkJson.text);
         refreshUI();
         variables.StartListening(story);
+        player.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
     }
     public void ExitStory()
     {
         variables.StopListening(story);
         CurrentText = "";
         eraseUI();
+        player.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
     }
 
 

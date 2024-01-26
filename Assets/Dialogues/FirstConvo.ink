@@ -15,9 +15,6 @@ It makes me happy that you think so.
 -> nextKnot
 
 ===nextKnot===
-{friendlyGreeting: Well since we are so cordial I want to let you in on a little secret}
-{hostileGreeting: You do not trust me yet? That will change...}
-You see I have made it my life's work to help the poor and unfortunate amongst us. 
-I aim to start with you.
-*END
+{friendlyGreeting: Well since we are so cordial I want to let you in on a little secret} {hostileGreeting: You do not trust me yet? That will change...} You see I have made it my life's work to help the poor and unfortunate amongst us. I aim to start with you.
+*[END]
 ->DONE
