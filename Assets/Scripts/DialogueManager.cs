@@ -1,34 +1,28 @@
 using Ink.Runtime;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 
 public class DialogueManager : MonoBehaviour
 {
-    public TextAsset inkJSON;
+    //public TextAsset inkJSON;
     public DialogueContainer[] dialogueContainers;
-  
+    public Transform TextLocation;
+    public Transform ButtonsLocation;
     public Story story;
     public static DialogueVariables variables;
-    public Text textPrefab;
+    public TMP_Text textPrefab;
     public Button buttonPrefab;
-   
-    
+
+
     [Header("load globals json")]
     [SerializeField] public TextAsset loadGlobalsJson;
 
-    public int Health = 0;
-    public bool finished = false;
-    public bool reset = false;
-    
-    public int agression = 0;
-    public int heart = 0;
-    public int professional = 0;
-    public int violence = 0;
     public string CurrentText;
 
-   
+
 
 
     public Dictionary<string, TextAsset> dialogueChanger = new Dictionary<string, TextAsset>();
@@ -38,23 +32,43 @@ public class DialogueManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        story = new Story(inkJSON.text);
-       
-            refreshUI();
-            if (variables == null)
-            {
-                variables = new DialogueVariables(loadGlobalsJson);
-            }
-            variables.StartListening(story);
-       
+        story = new Story(dialogueContainers[0].dialog.text);
+
+        refreshUI();
+        if (variables == null)
+        {
+            variables = new DialogueVariables(loadGlobalsJson);
+        }
+        variables.StartListening(story);
+
     }
 
-    private void Awake()
+    private void Update()
     {
-
-
-
+        if (story != null)
+        {
+            if (CurrentText.Contains("END"))
+            {
+                ExitStory();
+                Debug.Log("starting new story");
+            }
+        }
     }
+
+    public void EnterStory(TextAsset inkJson)
+    {
+        story = new Story(inkJson.text);
+        refreshUI();
+        variables.StartListening(story);
+    }
+    public void ExitStory()
+    {
+        variables.StopListening(story);
+        CurrentText = "";
+        eraseUI();
+    }
+
+
 
     void refreshUI()
     {
@@ -62,35 +76,43 @@ public class DialogueManager : MonoBehaviour
         // Debug.Log("new outcome is " + story.variablesState["outcome"]);
 
         eraseUI();
-        
-        Text storyText = Instantiate(textPrefab) as Text;
+
+        TMP_Text storyText = Instantiate(textPrefab) as TMP_Text;
         storyText.text = loadStoryChunk();
-        storyText.transform.SetParent(this.transform, false);
+        storyText.transform.SetParent(TextLocation, false);
 
         foreach (Choice choice in story.currentChoices)
         {
             Button choiceButton = Instantiate(buttonPrefab) as Button;
-            choiceButton.transform.SetParent(this.transform, false);
-            
-                
-            
-          
-
-            Text choiceText = choiceButton.GetComponentInChildren<Text>();
+            choiceButton.transform.SetParent(ButtonsLocation, false);
+            TMP_Text choiceText = choiceButton.GetComponentInChildren<TMP_Text>();
             choiceText.text = choice.text;
 
-            choiceButton.onClick.AddListener(delegate {
+            choiceButton.onClick.AddListener(delegate
+            {
                 chooseStoryChoice(choice);
             });
 
+            if (choiceText.text.Contains("END"))
+            {
+                choiceButton.onClick.AddListener(delegate
+                {
+                    ExitStory();
+                });
+            }
         }
     }
 
     void eraseUI()
     {
-        for (int i = 0; i < this.transform.childCount; i++)
+        if (TextLocation.childCount > 0)
         {
-            Destroy(this.transform.GetChild(i).gameObject);
+            Destroy(TextLocation.GetChild(0).gameObject);
+        }
+
+        for (int i = 0; i < ButtonsLocation.childCount; i++)
+        {
+            Destroy(ButtonsLocation.GetChild(i).gameObject);
         }
     }
 
@@ -98,11 +120,6 @@ public class DialogueManager : MonoBehaviour
     {
         story.ChooseChoiceIndex(choice.index);
         refreshUI();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
 
     }
 
@@ -115,53 +132,28 @@ public class DialogueManager : MonoBehaviour
 
             text = story.ContinueMaximally();
             CurrentText = text;
-
-            if (text.Contains("(You are being agressive)"))
-            {
-                agression = agression + 1;
-            }
-            if (text.Contains("(You are being kind)"))
-            {
-                heart = heart + 1;
-            }
-            if (text.Contains("(You are being professional)"))
-            {
-                professional = professional + 1;
-            }
-
-            if (text.Contains("(You resorted to violence)"))
-            {
-                violence = violence + 1;
-            }
-
-
-            if (text.Contains("(END)"))
-            {
-                finished = true;
-            }
-
-            
-
-
-
         }
-        Debug.Log("new outcome is " + story.variablesState["outcome"]);
-        
-        
+        // Debug.Log("new outcome is " + story.variablesState["outcome"]);
+
         return text;
     }
 
-    
 
+    public Ink.Runtime.Object GetVariableState(string variableName)
+    {
+        Ink.Runtime.Object variableValue = null;
+        variables.variables.TryGetValue(variableName, out variableValue);
+        if (variableValue == null)
+        {
+            Debug.LogWarning("Ink Variable was found to be null: " + variableName);
+        }
+        return variableValue;
+    }
 
-    // public Ink.Runtime.Object GetVariableState(string variableName)
-    // {
-    //    Ink.Runtime.Object variableValue = null;
-    //    dialogVariables.variables.TryGetValue(variableName, out variableValue);
-    //    if (variableValue == null)
-    //   {
-    //       Debug.LogWarning("Ink Variable was found to be null: " + variableName);
-    //   }
-    //   return variableValue;
-    //}
+    // This method will get called anytime the application exits.
+    // Depending on your game, you may want to save variable state in other places.
+    public void OnApplicationQuit()
+    {
+        variables.SaveVariables();
+    }
 }
