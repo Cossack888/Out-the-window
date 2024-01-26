@@ -1,4 +1,5 @@
 INCLUDE Globals.ink
+{convo1finished: ->DONE}
 Welcome to my story.
 I can not tell you how much it means to me that you came. 
 *[ I did not want to come] --> sad 
@@ -16,5 +17,7 @@ It makes me happy that you think so.
 
 ===nextKnot===
 {friendlyGreeting: Well since we are so cordial I want to let you in on a little secret} {hostileGreeting: You do not trust me yet? That will change...} You see I have made it my life's work to help the poor and unfortunate amongst us. I aim to start with you.
+~convo1finished=true
 *[END]
+
 ->DONE

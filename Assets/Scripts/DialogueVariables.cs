@@ -42,6 +42,8 @@ public class DialogueVariables
         }
     }
 
+
+
     public void StartListening(Story story)
     {
         // it's important that VariablesToStory is before assigning the listener!
@@ -61,10 +63,11 @@ public class DialogueVariables
         {
             variables.Remove(name);
             variables.Add(name, value);
+            SaveVariables(); // Add this line to save the variables after each change
         }
     }
 
-    private void VariablesToStory(Story story)
+    public void VariablesToStory(Story story)
     {
         foreach (KeyValuePair<string, Ink.Runtime.Object> variable in variables)
         {

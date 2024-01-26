@@ -16,7 +16,7 @@ public class DialogueManager : MonoBehaviour
     public TMP_Text textPrefab;
     public Button buttonPrefab;
     public Transform player;
-
+    public GameObject ConvoCanvas;
     [Header("load globals json")]
     [SerializeField] public TextAsset loadGlobalsJson;
 
@@ -57,13 +57,16 @@ public class DialogueManager : MonoBehaviour
 
     public void EnterStory(TextAsset inkJson)
     {
+        ConvoCanvas.SetActive(true);
         story = new Story(inkJson.text);
+        variables.VariablesToStory(story); // Load global variables into the current story
         refreshUI();
         variables.StartListening(story);
         player.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
     }
     public void ExitStory()
     {
+        ConvoCanvas.SetActive(false);
         variables.StopListening(story);
         CurrentText = "";
         eraseUI();
@@ -131,25 +134,44 @@ public class DialogueManager : MonoBehaviour
 
         if (story.canContinue)
         {
-
             text = story.ContinueMaximally();
             CurrentText = text;
         }
-        // Debug.Log("new outcome is " + story.variablesState["outcome"]);
+        else if (story.currentChoices.Count > 0)
+        {
+            // Handle choices if there are any
+            refreshUI();
+        }
+        else
+        {
+            Debug.Log("End of conversation");
+            ExitStory(); // Call your method to handle the end of the conversation
+        }
 
         return text;
     }
 
 
-    public Ink.Runtime.Object GetVariableState(string variableName)
+    public bool GetVariableState(string variableName)
     {
-        Ink.Runtime.Object variableValue = null;
-        variables.variables.TryGetValue(variableName, out variableValue);
-        if (variableValue == null)
+        if (variables.variables.TryGetValue(variableName, out Ink.Runtime.Object variableValue))
         {
-            Debug.LogWarning("Ink Variable was found to be null: " + variableName);
+            // Check if the variableValue is truthy
+            if (variableValue != null && variableValue.ToString().ToLower() == "true")
+            {
+                return true;
+            }
+            else
+            {
+                Debug.LogWarning("Ink Variable is not truthy (considered false): " + variableName);
+                return false;
+            }
         }
-        return variableValue;
+        else
+        {
+            Debug.LogWarning("Ink Variable not found: " + variableName);
+            return false;
+        }
     }
 
     // This method will get called anytime the application exits.

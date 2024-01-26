@@ -1,1 +1,1 @@
-﻿{"inkVersion":21,"root":[[["done",{"#f":5,"#n":"g-0"}],null],"done",{"global decl":["ev",false,{"VAR=":"friendlyGreeting"},false,{"VAR=":"hostileGreeting"},"/ev","end",null],"#f":1}],"listDefs":{}}
+﻿{"inkVersion":21,"root":[[["done",{"#f":5,"#n":"g-0"}],null],"done",{"global decl":["ev",false,{"VAR=":"friendlyGreeting"},false,{"VAR=":"hostileGreeting"},false,{"VAR=":"convo1finished"},false,{"VAR=":"convo2finished"},"/ev","end",null],"#f":1}],"listDefs":{}}
